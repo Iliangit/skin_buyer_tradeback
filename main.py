@@ -1,15 +1,11 @@
-import requests
-
 import json
 from requests import post, get
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium import webdriver
-from fake_useragent import UserAgent
 from time import sleep
 from cfg import *
 from bs4 import BeautifulSoup as BS
-import lxml
 from insert_filters import *
 import sqlite3
 from datetime import datetime, timedelta
@@ -29,7 +25,7 @@ useragent = UserAgent()
 options = webdriver.ChromeOptions()
 options.add_argument("--disable-blink-features=AutomaticControlled")
 options.add_argument(f"user-agent={useragent}")
-# options.add_argument("--headless")
+options.add_argument("--headless")
 
 browser = webdriver.Chrome(options=options)
 
@@ -178,8 +174,6 @@ try:
         price[1].send_keys(Keys.DELETE)
         price[1].send_keys(MAX_PRICE)
 
-
-
         count = browser.find_element(By.CSS_SELECTOR, "div[class='range-filters count-filters']").find_elements(By.CSS_SELECTOR, "input")
 
         count[0].click()
@@ -194,7 +188,7 @@ try:
     sleep(0.1)
     choice_2_serves()
     sleep(0.1)
-    # choice_auto_buy()
+    choice_auto_buy()
     sleep(0.1)
     min_max_prosent_()
     sleep(0.1)
@@ -246,6 +240,7 @@ try:
                 headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
                 cookies=session_to_cs_trade,
             )
+
             resp_data = response.json()
             if resp_data['status'] == 'error':
                 print(response.json()['error'])
@@ -266,10 +261,8 @@ try:
                         successful_items.append(it['market_hash_name'] + str(it['price']))
                         successful_items_name.append(it['market_hash_name'])
 
-
         if len(items_unavailable) != 0:
             send_req()
-
 
         if len(items_tradable) != 0:
             for num, item in enumerate(items_tradable):
@@ -291,7 +284,6 @@ try:
 
                         successful_items.append(item['market_hash_name'] + str(item['price']))
                         successful_items_name.append(item['market_hash_name'])
-
 
         for index_item in successful_items:
             cur.execute("INSERT INTO cards VALUES (?, ?)", (index_item, datetime.now(),))
