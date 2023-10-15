@@ -10,7 +10,7 @@ MIN_COUNT = str(1) #Введите минимальное количество
 
 GAME = "CSGO" #Введите игру (CSGO, Dota 2, H1Z1, Rust, PUBG, TF2)
 
-SECOND_SERVICE = "Keys-Store.com" #Введите второй сервис (SteamCommunity.com, BitSkins.com, TM Market, DMarket.com, DMarket.com P2P, Loot.Farm, Tradelt.gg, CS.Deals, CS.Trade, Keys-Store.com, CS.Deals Market)
+SECOND_SERVICE = "SteamCommunity.com" #Введите второй сервис (SteamCommunity.com, BitSkins.com, TM Market, DMarket.com, DMarket.com P2P, Loot.Farm, Tradelt.gg, CS.Deals, CS.Trade, Keys-Store.com, CS.Deals Market)
 
 STEAMCOMMUNITY_NUM_SALES = str(0) #Введите количество продаж в SteamCommunity.com
 

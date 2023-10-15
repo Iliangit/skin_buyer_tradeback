@@ -29,7 +29,7 @@ useragent = UserAgent()
 options = webdriver.ChromeOptions()
 options.add_argument("--disable-blink-features=AutomaticControlled")
 options.add_argument(f"user-agent={useragent}")
-options.add_argument("--headless")
+# options.add_argument("--headless")
 
 browser = webdriver.Chrome(options=options)
 
@@ -48,9 +48,6 @@ def check_card():
 
             cards = browser.find_element(By.CSS_SELECTOR, 'tbody[id="table-body"]').find_elements(By.CSS_SELECTOR, "tr")
 
-            sleep(2)
-
-
             if len(cards) != 0:
                 titles = []
                 prices = []
@@ -62,7 +59,6 @@ def check_card():
                     if cur.execute("SELECT indetifier FROM cards WHERE indetifier = (?)", (title_table + price_table.replace("$ ", ''),)).fetchone() is None:
                         prices.append(price_table)
                         titles.append(title_table)
-                print(titles, prices)
                 if len(titles) == 0:
                     print("Found 0 items", datetime.now())
                     sleep(5)
