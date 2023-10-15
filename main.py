@@ -25,7 +25,7 @@ useragent = UserAgent()
 options = webdriver.ChromeOptions()
 options.add_argument("--disable-blink-features=AutomaticControlled")
 options.add_argument(f"user-agent={useragent}")
-options.add_argument("--headless")
+# options.add_argument("--headless")
 
 browser = webdriver.Chrome(options=options)
 
@@ -57,7 +57,7 @@ def check_card():
                         titles.append(title_table)
                 if len(titles) == 0:
                     print("Found 0 items", datetime.now())
-                    sleep(5)
+                    sleep(3)
                     continue
                 else:
                     buy_skin(titles, prices)
@@ -66,7 +66,7 @@ def check_card():
                     continue
             else:
                 print("Found 0 items", datetime.now())
-                sleep(5)
+                sleep(3)
                 continue
         except AttributeError:
             sleep(3)
