@@ -94,7 +94,7 @@ def check_card():
         except AttributeError as ex:
             print(ex)
 
-            sleep(3)
+            sleep(5)
             continue
 
 try:
