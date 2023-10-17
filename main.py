@@ -1,4 +1,5 @@
 import json
+import requests
 from requests import post, get
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
@@ -25,13 +26,18 @@ useragent = UserAgent()
 options = webdriver.ChromeOptions()
 options.add_argument("--disable-blink-features=AutomaticControlled")
 options.add_argument(f"user-agent={useragent}")
-# options.add_argument("--headless")
+options.add_argument("--headless")
 
 browser = webdriver.Chrome(options=options)
 
 cook_url = "https://tradeback.io/ru"
 
-URL = "https://tradeback.io/ru/comparison"
+q = "https://tradeback.io/ru/comparison#"
+
+parametrs = param.format(GAME, SECOND_SERVICE, AUTO_BUY, MIN_PRICE, MAX_PRICE, MIN_COUNT, MIN_PROSENT, MAX_PROSENT)
+
+URL = q+"{" + parametrs + "}"
+
 
 def check_card():
     while True:
@@ -49,26 +55,45 @@ def check_card():
                 prices = []
                 for card in cards:
                     card_html = BS(card.get_attribute("innerHTML"), "lxml")
-                    title_table = card_html.find("td", class_="copy-name").text
-                    price_table = card_html.find_all("td", class_="field-price")[0].find("div", class_="first-line").find("span", class_="price usd").text
 
-                    if cur.execute("SELECT indetifier FROM cards WHERE indetifier = (?)", (title_table + price_table.replace("$ ", ''),)).fetchone() is None:
-                        prices.append(price_table)
-                        titles.append(title_table)
+                    if card_html is not None:
+
+                        title_table = card_html.find("td", class_="copy-name").text
+
+                        price_table = card_html.find_all("td", class_="field-price")[0].find("div", class_="first-line").find("span", class_="price usd unavailable")
+
+                        if price_table is not None:
+                            price_table = price_table.text
+
+                        elif price_table is None:
+                            price_table = card_html.find_all("td", class_="field-price")[0].find("div",
+                                                                                                 class_="first-line").find("span", class_="price usd").text
+
+
+                        if cur.execute("SELECT indetifier FROM cards WHERE indetifier = (?)", (title_table + price_table.replace("$ ", ''),)).fetchone() is None:
+                            prices.append(price_table)
+                            titles.append(title_table)
+
                 if len(titles) == 0:
                     print("Found 0 items", datetime.now())
-                    sleep(3)
+                    browser.refresh()
+                    sleep(5)
                     continue
+
                 else:
                     buy_skin(titles, prices)
                     titles.clear()
                     prices.clear()
                     continue
+
             else:
                 print("Found 0 items", datetime.now())
-                sleep(3)
+                sleep(5)
+                browser.refresh()
                 continue
-        except AttributeError:
+        except AttributeError as ex:
+            print(ex)
+
             sleep(3)
             continue
 
@@ -77,42 +102,18 @@ try:
 
     browser.get(cook_url)
 
-    for cookie in cookies:
-        browser.add_cookie(cookie)
+    browser.add_cookie(cookies)
     browser.get(URL)
-    print("Cookies loaded")
-    sleep(4)
+
+    def break_auto_refresh():
+        browser.find_elements(By.CSS_SELECTOR, "div[class='dropdown-select']")[3].click()
+        sleep(0.1)
+        browser.find_element(By.CSS_SELECTOR, "label[for='auto-update-live']").click()
 
 
-    def choice_game():
+    def sort():
+        browser.find_elements(By.CSS_SELECTOR, "th[class='center']")[2].find_element(By.CSS_SELECTOR, "i[class='fa fa-sort']").click()
 
-        browser.find_elements(By.CSS_SELECTOR, "div[class='dropdown-select']")[0].click()
-
-        games = browser.find_elements(By.CSS_SELECTOR, "li[class='option']")
-
-        for game in games:
-            if game.text == GAME:
-                game.click()
-
-
-    def choice_cs_trade():
-        browser.find_elements(By.CSS_SELECTOR, "div[class='comparison-settings-block service']")[0].find_element(By.CSS_SELECTOR, "div[class='dropdown-select']").click()
-        browser.execute_script("arguments[0].scrollIntoView(true);", browser.find_element(By.CSS_SELECTOR, "ul[class='list']"))
-        for num, servise in enumerate(browser.find_elements(By.CSS_SELECTOR, "li[class='option']")):
-            if servise.text == "CS.Trade":
-                servise.click()
-        browser.execute_script("window.scrollTo(0, 0)")
-
-    def choice_2_serves():
-        browser.find_elements(By.CSS_SELECTOR, "div[class='comparison-settings-block service']")[1].find_element(By.CSS_SELECTOR, "div[class='dropdown-select']").click()
-        browser.execute_script("arguments[0].scrollIntoView(true);", browser.find_element(By.CSS_SELECTOR, "ul[class='list']"))
-        for num, servise in enumerate(browser.find_elements(By.CSS_SELECTOR, "li[class='option']")):
-            if servise.text == SECOND_SERVICE:
-                servise.click()
-        browser.execute_script("window.scrollTo(0, 0)")
-
-    def choice_auto_buy():
-        browser.find_elements(By.CSS_SELECTOR, "div[class='comparison-settings-block categories']")[1].find_element(By.CSS_SELECTOR, "span[title='Цены предметов по запросам авто покупки']").find_element(By.CSS_SELECTOR, "label").click()
 
     def number_of_sales():
         browser.find_element(By.CSS_SELECTOR, "div[id='more-filters']").click()
@@ -146,60 +147,12 @@ try:
 
         browser.find_element(By.CSS_SELECTOR, "div[class='iziModal-header-buttons']").find_elements(By.CSS_SELECTOR, "a")[0].click()
 
-    def min_max_prosent_():
-
-        min_max_prosent = browser.find_element(By.CSS_SELECTOR, "div[class='range-filters profit-filters']").find_elements(By.CSS_SELECTOR, "input")
-
-        min_max_prosent[0].click()
-        min_max_prosent[0].send_keys(Keys.CONTROL + "a")
-        min_max_prosent[0].send_keys(Keys.DELETE)
-        min_max_prosent[0].send_keys(MIN_PROSENT)
-
-        min_max_prosent[1].click()
-        min_max_prosent[1].send_keys(Keys.CONTROL + "a")
-        min_max_prosent[1].send_keys(Keys.DELETE)
-        min_max_prosent[1].send_keys(MAX_PROSENT)
-
-
-    def count_price_():
-        price = browser.find_element(By.CSS_SELECTOR, "div[class='range-filters price-filters']").find_elements(By.CSS_SELECTOR, "input")
-
-        price[0].click()
-        price[0].send_keys(Keys.CONTROL + "a")
-        price[0].send_keys(Keys.DELETE)
-        price[0].send_keys(MIN_PRICE)
-
-        price[1].click()
-        price[1].send_keys(Keys.CONTROL + "a")
-        price[1].send_keys(Keys.DELETE)
-        price[1].send_keys(MAX_PRICE)
-
-        count = browser.find_element(By.CSS_SELECTOR, "div[class='range-filters count-filters']").find_elements(By.CSS_SELECTOR, "input")
-
-        count[0].click()
-        count[0].send_keys(Keys.CONTROL + "a")
-        count[0].send_keys(Keys.DELETE)
-        count[0].send_keys(MIN_COUNT)
-
-
-    choice_game()
-    sleep(0.1)
-    choice_cs_trade()
-    sleep(0.1)
-    choice_2_serves()
-    sleep(0.1)
-    choice_auto_buy()
-    sleep(0.1)
-    min_max_prosent_()
-    sleep(0.1)
-    count_price_()
-    sleep(0.1)
     number_of_sales()
-    sleep(0.1)
-    browser.refresh()
-
-    sleep(10)
-
+    sleep(0.2)
+    break_auto_refresh()
+    sleep(0.2)
+    sort()
+    sleep(2)
 
     def buy_skin(titles, prices):
         print(f"{len(titles)} skins from table")
@@ -306,10 +259,10 @@ try:
         print(f"End of purchases, balance: {bal} $")
         return
 
+
     check_card()
 except AttributeError:
     print("exepition")
     browser.get(URL)
     sleep(3)
     check_card()
-
