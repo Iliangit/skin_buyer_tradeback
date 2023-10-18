@@ -1,5 +1,4 @@
 import json
-import requests
 from requests import post, get
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
@@ -44,7 +43,7 @@ def check_card():
         try:
             times = cur.execute("SELECT time FROM cards").fetchall()
             for bd_time in times:
-                if datetime.now() - datetime.strptime(bd_time[0], '%Y-%m-%d %H:%M:%S.%f') > timedelta(minutes=20):
+                if datetime.now() - datetime.strptime(bd_time[0], '%Y-%m-%d %H:%M:%S.%f') > timedelta(minutes=1):
                     cur.execute("DELETE FROM cards WHERE time = (?)", (bd_time[0],))
                     db.commit()
 
@@ -76,7 +75,8 @@ def check_card():
 
                 if len(titles) == 0:
                     print("Found 0 items", datetime.now())
-                    browser.refresh()
+
+                    browser.find_element(By.CSS_SELECTOR, 'div[class="comparison-refresh-btn"]').click()
                     sleep(5)
                     continue
 
@@ -88,22 +88,24 @@ def check_card():
 
             else:
                 print("Found 0 items", datetime.now())
+                browser.find_element(By.CSS_SELECTOR, 'div[class="comparison-refresh-btn"]').click()
                 sleep(5)
-                browser.refresh()
                 continue
         except AttributeError as ex:
             print(ex)
-
+            browser.find_element(By.CSS_SELECTOR, 'div[class="comparison-refresh-btn"]').click()
             sleep(5)
             continue
 
 try:
-    browser.set_window_size(1080, 1920)
+    browser.set_window_size(1920, 1080)
 
     browser.get(cook_url)
 
     browser.add_cookie(cookies)
+    print("Cookies loaded")
     browser.get(URL)
+
 
     def break_auto_refresh():
         browser.find_elements(By.CSS_SELECTOR, "div[class='dropdown-select']")[3].click()
@@ -175,7 +177,7 @@ try:
             for title, price in zip(titles, prices):
                 if title in item['market_hash_name'] and str(item['price']) == price.replace("$ ", ''):
                     if item["status"] == "unavailable":
-                        if items_unavailable_count < 49:
+                        if items_unavailable_count < 1:
                             items_unavailable_count += 1
                             items_unavailable.append(item)
 
