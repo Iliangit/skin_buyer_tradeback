@@ -10,7 +10,9 @@ from insert_filters import *
 import sqlite3
 from datetime import datetime, timedelta
 from fake_useragent import UserAgent
+import cloudscraper
 
+scraper = cloudscraper.create_scraper()
 
 db = sqlite3.connect('cards.db')
 cur = db.cursor()
@@ -24,7 +26,7 @@ useragent = UserAgent()
 
 options = webdriver.ChromeOptions()
 options.add_argument("--disable-blink-features=AutomaticControlled")
-options.add_argument(f"user-agent={useragent}")
+options.add_argument(f"user-agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.888 YaBrowser/23.9.2.888 Yowser/2.5 Safari/537.36'")
 options.add_argument("--headless")
 
 browser = webdriver.Chrome(options=options)
@@ -187,9 +189,9 @@ try:
 
         print(f"Number of skins from cs.trade. unavailable: {len(items_unavailable)}, tradable: {len(items_tradable)} ")
 
-        url = "https://cs.trade/trade/ru"
+        url = "https://cs.trade/trade"
         def send_req():
-            response = post(
+            response = scraper.post(
                 url,
                 data={"bot": "virtual", "bot_chosen_items": json.dumps(items_unavailable), "tt": "r"},
                 headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
@@ -197,6 +199,7 @@ try:
             )
 
             resp_data = response.json()
+
             if resp_data['status'] == 'error':
                 print(response.json()['error'])
                 if 'item_status' in response.json().keys():
@@ -221,7 +224,7 @@ try:
 
         if len(items_tradable) != 0:
             for num, item in enumerate(items_tradable):
-                response = post(
+                response = scraper.post(
                     url,
                     data={"bot": dict(item)["bot"], "bot_chosen_items": json.dumps([items_tradable[num]]), "tt": "s"},
                     headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
