@@ -10,9 +10,6 @@ from insert_filters import *
 import sqlite3
 from datetime import datetime, timedelta
 from fake_useragent import UserAgent
-import cloudscraper
-
-scraper = cloudscraper.create_scraper()
 
 db = sqlite3.connect('cards.db')
 cur = db.cursor()
@@ -191,7 +188,7 @@ try:
 
         url = "https://cs.trade/trade"
         def send_req():
-            response = scraper.post(
+            response = post(
                 url,
                 data={"bot": "virtual", "bot_chosen_items": json.dumps(items_unavailable), "tt": "r"},
                 headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
@@ -224,7 +221,7 @@ try:
 
         if len(items_tradable) != 0:
             for num, item in enumerate(items_tradable):
-                response = scraper.post(
+                response = post(
                     url,
                     data={"bot": dict(item)["bot"], "bot_chosen_items": json.dumps([items_tradable[num]]), "tt": "s"},
                     headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
