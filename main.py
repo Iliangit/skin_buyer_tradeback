@@ -10,9 +10,6 @@ from insert_filters import *
 import sqlite3
 from datetime import datetime, timedelta
 from fake_useragent import UserAgent
-import cloudscraper
-
-scraper = cloudscraper.create_scraper()
 
 db = sqlite3.connect('cards.db')
 cur = db.cursor()
