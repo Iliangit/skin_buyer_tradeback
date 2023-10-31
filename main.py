@@ -48,7 +48,10 @@ def check_card():
                 if datetime.now() - datetime.strptime(bd_time[0], '%Y-%m-%d %H:%M:%S.%f') > timedelta(minutes=1):
                     cur.execute("DELETE FROM cards WHERE time = (?)", (bd_time[0],))
                     db.commit()
-
+            if len(browser.find_elements(By.CSS_SELECTOR, 'div[class="error-text"]')) == 0:
+                print("Waiting")
+                sleep(3)
+                continue
             cards = browser.find_element(By.CSS_SELECTOR, 'tbody[id="table-body"]').find_elements(By.CSS_SELECTOR, "tr")
 
             if len(cards) != 0:
@@ -191,7 +194,7 @@ try:
 
         url = "https://cs.trade/trade"
         def send_req():
-            response = scraper.post(
+            response = post(
                 url,
                 data={"bot": "virtual", "bot_chosen_items": json.dumps(items_unavailable), "tt": "r"},
                 headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
@@ -224,7 +227,7 @@ try:
 
         if len(items_tradable) != 0:
             for num, item in enumerate(items_tradable):
-                response = scraper.post(
+                response = post(
                     url,
                     data={"bot": dict(item)["bot"], "bot_chosen_items": json.dumps([items_tradable[num]]), "tt": "s"},
                     headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
