@@ -186,7 +186,6 @@ try:
                     elif item["status"] == "tradable":
                         items_tradable.append(item)
 
-
         print(f"Number of skins from cs.trade. unavailable: {len(items_unavailable)}, tradable: {len(items_tradable)} ")
 
         url = "https://cs.trade/trade"
